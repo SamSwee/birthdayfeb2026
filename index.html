@@ -152,6 +152,35 @@
             color: #ffd700;
             font-size: 1.1em;
         }
+
+        .rsvp {
+            margin-top: 15px;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .rsvp-text {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.4);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .rsvp-text:hover {
+            color: #fff;
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            transform: scale(1.05);
+            cursor: pointer;
+        }
         
         .heart-icon {
             font-size: 3em;
@@ -205,8 +234,8 @@
             <small>Level 1</small>
         </div>
 
-        <div> 
-            <span>RSVP Here: Link</span>
+        <div class="rsvp">
+            <span class="rsvp-text">RSVP here:</span>
         </div>
     </div>
 </body>
