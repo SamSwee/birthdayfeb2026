@@ -112,15 +112,6 @@
             text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
-        .header-subtitle {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2em;
-            margin-top: 10px;
-            font-weight: 300;
-            position: relative;
-            z-index: 1;
-        }
-        
         .content {
             padding: 40px;
         }
@@ -476,6 +467,14 @@
             to { transform: rotate(360deg); }
         }
         
+        /* Hidden iframe for form submission */
+        #hidden-iframe {
+            display: none;
+            width: 0;
+            height: 0;
+            border: none;
+        }
+        
         @media (max-width: 600px) {
             .months-container {
                 grid-template-columns: 1fr;
@@ -502,10 +501,13 @@
     </style>
 </head>
 <body>
+    <!-- Hidden iframe for form submission -->
+    <iframe name="hidden-iframe" id="hidden-iframe"></iframe>
+    
     <!-- Floating Background Elements -->
-    <div class="floating" style="left: 10%; animation-delay: 0s;">🎉</div>
+    <div class="floating" style="left: 10%; animation-delay: 0s;">💜</div>
     <div class="floating" style="left: 30%; animation-delay: 5s;">💎</div>
-    <div class="floating" style="left: 70%; animation-delay: 10s;">🎂</div>
+    <div class="floating" style="left: 70%; animation-delay: 10s;">💙</div>
     <div class="floating" style="left: 90%; animation-delay: 15s;">✨</div>
     
     <div class="card">
@@ -516,7 +518,7 @@
         
         <div class="content">
             <!-- Dual Month Sections -->
-           <div class="months-container">
+            <div class="months-container">
                 <div class="month-section feb">
                     <div class="month-icon">🎂</div>
                     <div class="month-name">February</div>
@@ -551,7 +553,7 @@
                 </div>
             </div>
             
-                       <!-- Event Details -->
+            <!-- Event Details -->
             <div class="event-details">
                 <div class="detail-grid">
                     <div class="detail-item">
@@ -579,11 +581,16 @@
                 <div class="rsvp-form-container" id="rsvpForm">
                     <h3 class="form-title">🎉 Join the Celebration</h3>
                     
-                    <form id="rsvpFormElement">
+                    <!-- Form targets hidden iframe -->
+                    <form id="rsvpFormElement" 
+                          action="https://docs.google.com/forms/d/e/1FAIpQLSclQdWXAXL9aAJ0-JyLbNBsDZO8tVYQJeaKAw6xV-_P-sEUBA/formResponse" 
+                          method="POST" 
+                          target="hidden-iframe">
+                        
                         <!-- Name -->
                         <div class="form-group">
                             <label>Your Name <span class="required">*</span></label>
-                            <input type="text" name="entry.877086558" id="nameInput" required placeholder="Enter your full name">
+                            <input type="text" name="entry.877086558" required placeholder="Enter your full name">
                         </div>
                         
                         <!-- Attendance -->
@@ -632,6 +639,11 @@
                             <input type="text" name="entry.1608302310" placeholder="e.g., Vegetarian, Nut allergy, etc.">
                         </div>
                         
+                        <!-- Google Form hidden fields -->
+                        <input type="hidden" name="fvv" value="1">
+                        <input type="hidden" name="fbzx" value="-5711697567290943160">
+                        <input type="hidden" name="pageHistory" value="0">
+                        
                         <button type="submit" class="submit-btn" id="submitBtn">
                             Submit RSVP
                         </button>
@@ -647,6 +659,8 @@
     </div>
 
     <script>
+        let formSubmitted = false;
+        
         function toggleForm() {
             const form = document.getElementById('rsvpForm');
             const btn = document.querySelector('.rsvp-btn');
@@ -674,67 +688,77 @@
             radio.checked = true;
         }
         
-        // AJAX Form Submission to Google Forms
+        // Handle form submission
         document.getElementById('rsvpFormElement').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
             const submitBtn = document.getElementById('submitBtn');
-            const successMsg = document.getElementById('successMsg');
             const form = this;
+            const successMsg = document.getElementById('successMsg');
             
             // Disable button and show loading
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Submitting<span class="loading-spinner"></span>';
             
-            // Collect form data
-            const formData = new FormData(form);
+            // Set flag to track submission
+            formSubmitted = true;
             
-            // Add required Google Form hidden fields
-            formData.append('fvv', '1');
-            formData.append('fbzx', '-5711697567290943160');
-            formData.append('pageHistory', '0');
-            
-            // Submit to Google Forms using fetch (no-cors mode)
-            fetch('https://docs.google.com/forms/d/e/1FAIpQLSclQdWXAXL9aAJ0-JyLbNBsDZO8tVYQJeaKAw6xV-_P-sEUBA/formResponse', {
-                method: 'POST',
-                mode: 'no-cors', // Required for Google Forms
-                body: formData
-            })
-            .then(() => {
-                // Show success message (Google Forms doesn't return proper CORS response, so we assume success)
-                form.style.display = 'none';
-                successMsg.classList.add('show');
-                
-                // Reset form after delay
-                setTimeout(() => {
-                    form.reset();
-                    document.querySelectorAll('.radio-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
+            // Wait for iframe to load (indicates form submission complete)
+            document.getElementById('hidden-iframe').onload = function() {
+                if (formSubmitted) {
+                    // Show success message
+                    form.style.display = 'none';
+                    successMsg.classList.add('show');
                     
-                    // Hide success message and show form again
-                    successMsg.classList.remove('show');
-                    form.style.display = 'block';
-                    
-                    // Reset button
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Submit RSVP';
-                    
-                    // Optionally close the form
+                    // Reset after delay
                     setTimeout(() => {
-                        toggleForm();
-                    }, 2000);
+                        form.reset();
+                        document.querySelectorAll('.radio-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        
+                        successMsg.classList.remove('show');
+                        form.style.display = 'block';
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Submit RSVP';
+                        
+                        formSubmitted = false;
+                        
+                        // Close form
+                        setTimeout(() => {
+                            toggleForm();
+                        }, 2000);
+                        
+                    }, 4000);
+                }
+            };
+            
+            // Fallback if iframe doesn't trigger (some browsers)
+            setTimeout(() => {
+                if (formSubmitted) {
+                    form.style.display = 'none';
+                    successMsg.classList.add('show');
                     
-                }, 4000);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                // Even on error, Google Forms usually receives the data due to no-cors
-                // But show error message just in case
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Submit RSVP';
-                alert('There was an issue submitting. Please try again.');
-            });
+                    setTimeout(() => {
+                        form.reset();
+                        document.querySelectorAll('.radio-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        
+                        successMsg.classList.remove('show');
+                        form.style.display = 'block';
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Submit RSVP';
+                        
+                        formSubmitted = false;
+                        
+                        setTimeout(() => {
+                            toggleForm();
+                        }, 2000);
+                        
+                    }, 4000);
+                }
+            }, 2000);
         });
         
         // Add visual feedback for radio buttons
